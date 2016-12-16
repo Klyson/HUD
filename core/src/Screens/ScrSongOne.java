@@ -173,7 +173,6 @@ public class ScrSongOne extends InputAdapter implements Screen {
             } else {
                 font.setColor(Color.RED);
             }
-            //System.out.print ln(g);
             if (!isRand) {
                 nRand = ThreadLocalRandom.current().nextInt(200, 400 + 1); //randomizes WHEN to change the location of the colours
                 isRand = true;
@@ -254,14 +253,19 @@ public class ScrSongOne extends InputAdapter implements Screen {
                     isClick = false;
                 }
             }
-            font.draw(batch, String.valueOf(nJ), 200, fYMid * 2);
-            font.draw(batch, String.valueOf(fGood - 1), 250, fYMid * 2);
-            font.draw(batch, String.valueOf(fEff) + "%", 300, fYMid * 2);
-            font.draw(batch, String.valueOf(nTimeout) + " / " + String.valueOf(nMaxOut), 425, fYMid * 2);
+            if (isCol) {
+                font.draw(batch, String.valueOf(nCountCol) + " / " + String.valueOf("110"), fXMid + 30, fYMid * 2);
+            } else {
+            font.draw(batch, String.valueOf(nJ) + " / " + mainmenu.text, 170, fYMid * 2);//amount of pattern remaining
+            font.draw(batch, String.valueOf(fGood - 1), 220, fYMid * 2);//how many correct clicks
+            font.draw(batch, String.valueOf(fEff) + "%", 300, fYMid * 2);//percentage correct
+            font.draw(batch, String.valueOf(nTimeout) + " / " + String.valueOf(nMaxOut), 425, fYMid * 2);//time until middle colour changes
+            font.draw(batch, String.valueOf(nCountSwitch) + " / " + String.valueOf(nRand), 500, fYMid * 2);//time until colour locations change
+            }
             font.draw(batch, "Escape to exit", fXMid - 50, 30);
             font.draw(batch, "Spacebar to pause or unpause", fXMid - 50, 76);
             font.draw(batch, "Press Enter to show end screen!", fXMid - 50, 52);
-            System.out.println("nCountSwitch: " + nCountSwitch + " nRand: " + nRand);
+            //System.out.println("nCountSwitch: " + nCountSwitch + " nRand: " + nRand);
             batch.end();
             if (bCount && !isCol) {
                 nTimeout++;
@@ -287,10 +291,17 @@ public class ScrSongOne extends InputAdapter implements Screen {
         } else if (!isDone && isPause) { //Paused
             shapeRenderer.begin(ShapeType.Filled);
             batch.begin();
-            sprite1.draw(batch);
-            sprite2.draw(batch);
-            sprite3.draw(batch);
-            sprite4.draw(batch);
+            if (isCol) {
+                sprite1.draw(batch);
+                sprite2.draw(batch);
+                sprite3.draw(batch);
+                sprite4.draw(batch);
+            } else {
+                sprite1G.draw(batch);
+                sprite2G.draw(batch);
+                sprite3G.draw(batch);
+                sprite4G.draw(batch);
+            }
             isCirc = false;
             if (isExit) {
                 Gdx.app.exit();
@@ -336,14 +347,6 @@ public class ScrSongOne extends InputAdapter implements Screen {
                     shapeRenderer.setColor(Color.PURPLE);
                 }
             }
-//            if (isClick &&nTimeout!=nMaxOut) {
-//                nCount++;
-//                shapeRenderer.setColor(Color.WHITE);
-//                if (nCount == 4) {
-//                    nCount = 0;
-//                    isClick = false;
-//                }
-//            }
             font.draw(batch, String.valueOf(nJ), 200, fYMid * 2);
             font.draw(batch, String.valueOf(fGood - 1), 250, fYMid * 2);
             font.draw(batch, String.valueOf(fEff) + "%", 300, fYMid * 2);
@@ -351,9 +354,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
             font.draw(batch, "Escape to exit", fXMid - 50, 30);
             font.draw(batch, "Spacebar to pause or unpause", fXMid - 50, 76);
             font.draw(batch, "Press Enter to show end screen!", fXMid - 50, 52);
-            if (!isCol) {
-                spriteP.draw(batch);
-            }
+            spriteP.draw(batch);
             batch.end();
             shapeRenderer.circle(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 150);
             shapeRenderer.end();
@@ -465,7 +466,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
             }
             if (!circ.contains(screenX, screenY) && !isPause && !isColNoClick) {
                 isCirc = true;
-            } 
+            }
             if (isCirc) {
                 bCount = true;
                 nNext = ThreadLocalRandom.current().nextInt(0, 3 + 1);
