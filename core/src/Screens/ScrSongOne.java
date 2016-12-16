@@ -441,6 +441,9 @@ public class ScrSongOne extends InputAdapter implements Screen {
         isCirc = false;
         if (isDone && button == Buttons.RIGHT) {
             fGood = 1;
+            isCol = true;
+            nCountSwitch = 0;
+            nCountCol = 0;
             fEff = 0;
             nJ = 0;
             nTimeout = 0;
