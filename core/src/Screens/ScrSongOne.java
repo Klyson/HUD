@@ -40,7 +40,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
     ShapeRenderer shapeRenderer, shapeRend2;
     private Rectangle recTL, recTR, recBL, recBR;
     float fXMid, fYMid, fGood = 1/*number of correct clicks*/, fEff = 0/*% correct so far*/;
-    int nJ = 0/**/, nTimeout = 0, nMaxOut = 90, nCount = 0, nNext, nCountSwitch = 0, nRand = 10, nJMax, nCountCol = 0;
+    int nJ = 0/**/, nTimeout = 0, /*when nTimeout == nMaxOut: change middle colour*/ nMaxOut = 90, nCount = 0, nNext, nCountSwitch = 0, nRand = 10, nJMax, nCountCol = 0;
     ArrayList<Rectangle> AlRandRect = new ArrayList();
     //0 = TL, 1 = TR, 2 = BL, 3 = BR. 
     //=========================TV INP=============================//
@@ -52,7 +52,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
     Animation araniDance[];
     TextureRegion trTemp;
     int fW, fH, fSx, fSy;
-    int nFrame, nPos, nTime, z;
+    int nFrame, nPos, nTime, nTextCount;
     private boolean bDance = true;
     //=========================TV INP=============================//
 
@@ -149,38 +149,38 @@ public class ScrSongOne extends InputAdapter implements Screen {
     public void render(float delta) {
         //=========================TV INP=============================//
         nTime++;
-        z++;
+        nTextCount++;
         //=========================TV INP=============================//
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         if (!isDone && !isPause) { //Playing Game
-            if (isCol) {
+            if (isCol) {//colours displayed
                 isColNoClick = true;
                 nCountCol++;
                 if (nCountCol == 110) {
                     isCol = false;
                     nCountCol = 0;
                 }
-            } else {
+            } else {//colours not displayed: screen is grey and points can be earned
                 nCountSwitch++;
                 isColNoClick = false;
             }
-            if (nJ == nJMax) {
+            if (nJ == nJMax) {//round ends
                 isDone = true;
             }
             isCont = true;
-            if ((nRand - 30) >= nCountSwitch) {
+            if ((nRand - 30) >= nCountSwitch) {//colour location is about to change
                 font.setColor(Color.WHITE);
             } else {
                 font.setColor(Color.RED);
             }
-            if (!isRand) {
+            if (!isRand) {//set how long before changing the colour location again
                 nRand = ThreadLocalRandom.current().nextInt(200, 400 + 1); //randomizes WHEN to change the location of the colours
                 isRand = true;
             }
             //System.out.println(rand);
-            if (nCountSwitch == nRand) {
+            if (nCountSwitch == nRand) {//change the colour locations
                 nCountSwitch = 0;
-                isRand = false;
+                isRand = false;//access the above if statement for one render
                 isCol = true;
                 Collections.shuffle(AlRandRect);
                 sprite1.setPosition(AlRandRect.get(0).x, AlRandRect.get(0).y); //S1 = 0
@@ -190,20 +190,20 @@ public class ScrSongOne extends InputAdapter implements Screen {
             }
             shapeRenderer.begin(ShapeType.Filled);
             batch.begin();
-            if (isCol) {
+            if (isCol) {//draw coloured sprites
                 sprite1.draw(batch);
                 sprite2.draw(batch);
                 sprite3.draw(batch);
                 sprite4.draw(batch);
-            } else {
+            } else {//draw grey sprites
                 sprite1G.draw(batch);
                 sprite2G.draw(batch);
                 sprite3G.draw(batch);
                 sprite4G.draw(batch);
             }
-            if (isExit) {
+            if (isExit) {//exit
                 Gdx.app.exit();
-            }
+            }//these nested ifs dictate what colour to display in the middle
             if (AlRandRect.get(nNext) == recTL) {
                 if (nNext == 0) {
                     shapeRenderer.setColor(Color.RED);
@@ -245,7 +245,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
                     shapeRenderer.setColor(Color.PURPLE);
                 }
             }
-            if (isClick && nTimeout != nMaxOut) {
+            if (isClick && nTimeout != nMaxOut) {//make the center circle flash white
                 nCount++;
                 shapeRenderer.setColor(Color.WHITE);
                 if (nCount == 4) {
@@ -253,24 +253,24 @@ public class ScrSongOne extends InputAdapter implements Screen {
                     isClick = false;
                 }
             }
-            if (isCol) {
+            if (isCol) {//draw how long remains before points can be earned while coloured
                 font.draw(batch, String.valueOf(nCountCol) + " / " + String.valueOf("110"), fXMid + 30, fYMid * 2);
-            } else {
-            font.draw(batch, String.valueOf(nJ) + " / " + mainmenu.text, 170, fYMid * 2);//amount of pattern remaining
-            font.draw(batch, String.valueOf(fGood - 1), 220, fYMid * 2);//how many correct clicks
-            font.draw(batch, String.valueOf(fEff) + "%", 300, fYMid * 2);//percentage correct
-            font.draw(batch, String.valueOf(nTimeout) + " / " + String.valueOf(nMaxOut), 425, fYMid * 2);//time until middle colour changes
-            font.draw(batch, String.valueOf(nCountSwitch) + " / " + String.valueOf(nRand), 500, fYMid * 2);//time until colour locations change
-            }
+            } else {//draw these fonts while grey
+                font.draw(batch, String.valueOf(nJ) + " / " + mainmenu.text, 170, fYMid * 2);//amount of pattern remaining
+                font.draw(batch, String.valueOf(fGood - 1), 220, fYMid * 2);//how many correct clicks
+                font.draw(batch, String.valueOf(fEff) + "%", 300, fYMid * 2);//percentage correct
+                font.draw(batch, String.valueOf(nTimeout) + " / " + String.valueOf(nMaxOut), 425, fYMid * 2);//time until middle colour changes
+                font.draw(batch, String.valueOf(nCountSwitch) + " / " + String.valueOf(nRand), 500, fYMid * 2);//time until colour locations change
+            }//draw these in both
             font.draw(batch, "Escape to exit", fXMid - 50, 30);
             font.draw(batch, "Spacebar to pause or unpause", fXMid - 50, 76);
             font.draw(batch, "Press Enter to show end screen!", fXMid - 50, 52);
             //System.out.println("nCountSwitch: " + nCountSwitch + " nRand: " + nRand);
             batch.end();
-            if (bCount && !isCol) {
+            if (bCount && !isCol) {//if true: count up towards changing middle colour
                 nTimeout++;
             }
-            if (nTimeout == nMaxOut && !isClick) {
+            if (nTimeout == nMaxOut && !isClick) {//change middle colour
                 if (!isJUp) {
                     nJ++;
                     nNext = ThreadLocalRandom.current().nextInt(0, 3 + 1);
@@ -279,7 +279,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
                 bCount = false;
                 nCount++;
                 shapeRenderer.setColor(Color.WHITE);
-                if (nCount == 4) {
+                if (nCount == 4) {//middle colour flashes white
                     nTimeout = 0;
                     nCount = 0;
                     isJUp = false;
@@ -288,7 +288,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
             }
             shapeRenderer.circle(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 150);
             shapeRenderer.end();
-        } else if (!isDone && isPause) { //Paused
+        } else if (!isDone && isPause) { //Paused (same comments)
             shapeRenderer.begin(ShapeType.Filled);
             batch.begin();
             if (isCol) {
@@ -376,7 +376,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
         //=========================TV INP=============================//
         if (bDance) {
             if (nGB == 1) {
-                if (z % 0.5 == 0) {
+                if (nTextCount % 0.5 == 0) {
                     batch.begin();
                     textGreat.draw(batch, "GREAT", nTextY, nTextX);
                     nTextX += 5;
@@ -390,7 +390,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
                 }
             }
             if (nGB == 2) {
-                if (z % 0.5 == 0) {
+                if (nTextCount % 0.5 == 0) {
                     batch.begin();
                     textBad.draw(batch, "bad", nTextY, nTextX += 5);
                     batch.end();
@@ -439,7 +439,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         isCorrect = false;
         isCirc = false;
-        if (isDone && button == Buttons.RIGHT) {
+        if (isDone && button == Buttons.RIGHT) { //restart
             fGood = 1;
             isCol = true;
             nCountSwitch = 0;
@@ -448,12 +448,12 @@ public class ScrSongOne extends InputAdapter implements Screen {
             nJ = 0;
             nTimeout = 0;
             isDone = !isDone;
-        } else if (isDone && button == Buttons.LEFT) {
+        } else if (isDone && button == Buttons.LEFT) { //continue
             nTimeout = 0;
             isDone = !isDone;
         }
         bDance = true;
-        if (!isDone) {
+        if (!isDone) {//decide if the click was correct
             if (button == Buttons.LEFT && recTL.contains(screenX, screenY)
                     && AlRandRect.get(nNext) == recBL && !circ.contains(screenX, screenY)) {
                 isCorrect = true;
@@ -467,23 +467,23 @@ public class ScrSongOne extends InputAdapter implements Screen {
                     && AlRandRect.get(nNext) == recTR && !circ.contains(screenX, screenY)) {
                 isCorrect = true;
             }
-            if (!circ.contains(screenX, screenY) && !isPause && !isColNoClick) {
+            if (!circ.contains(screenX, screenY) && !isPause && !isColNoClick) {//nothing happens if clicking middle circle
                 isCirc = true;
             }
-            if (isCirc) {
+            if (isCirc) {//if anywhere other than middle circle clicked:
                 bCount = true;
                 nNext = ThreadLocalRandom.current().nextInt(0, 3 + 1);
                 isClick = true;
                 nTimeout = 0;
                 nJ++;
                 fEff = (fGood / nJ) * 100;
-                if (isCorrect) {
+                if (isCorrect) {//these increase if correctly clicked
                     nGB = 1;
                     fGood++;
                 } else if (!isCorrect) {
                     nGB = 2;
                 }
-            }
+            }//dictates which animation to do
             if (fEff == 100) {
                 nPos = 6;
             }
@@ -501,7 +501,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
     }
 
     @Override
-    public boolean keyDown(int keycode) {
+    public boolean keyDown(int keycode) {//keyboard input
         if (keycode == Input.Keys.ESCAPE) {
             isExit = true;
         } else if (keycode == Input.Keys.ENTER) {
