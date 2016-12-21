@@ -24,21 +24,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public class ScrSongOne extends InputAdapter implements Screen {
 
     GamGame1 game;
     ScrMainMenu mainmenu;
     private float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();
-    private SpriteBatch batch;
+    private SpriteBatch batch, batchFonts;
     private Texture img1, img2, img3, img4;
     private Sprite sprite1, sprite2, sprite3, sprite4, spriteP, sprite1G, sprite2G, sprite3G, sprite4G;
     private boolean isCorrect, isExit, isCirc, isKeyChange, isClick, isDone, bCount = true, isJUp, isRand, isCont, isPause, isCol = true, isColPause = true, isColNoClick;
     private BitmapFont font;
     private Circle circ;
     private Color TL, TR, BL, BR;
-    ShapeRenderer shapeRenderer, shapeRend2;
-    private Rectangle recTL, recTR, recBL, recBR;
+    ShapeRenderer shapeRenderer, shapeRendHud;
+    private Rectangle recTL, recTR, recBL, recBR, recHUD;
     float fXMid, fYMid, fGood = 1/*number of correct clicks*/, fEff = 0/*% correct so far*/;
     int nJ = 0/**/, nTimeout = 0, /*when nTimeout == nMaxOut: change middle colour*/ nMaxOut = 90, nCount = 0, nNext, nCountSwitch = 0, nRand = 10, nJMax, nCountCol = 0;
     ArrayList<Rectangle> AlRandRect = new ArrayList();
@@ -68,6 +69,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
         nJMax = Integer.parseInt(mainmenu.text);
         font = new BitmapFont();
         batch = new SpriteBatch();
+        batchFonts = new SpriteBatch();
         sprite1 = new Sprite(new Texture("Red.png"));//TL
         sprite2 = new Sprite(new Texture("Blue.png"));//TR
         sprite3 = new Sprite(new Texture("green.jpg"));//BL
@@ -78,6 +80,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
         sprite3G = new Sprite(new Texture("GreyBL.png"));//TLsprite1G = new Sprite(new Texture("GreyTL.png"));//TL
         sprite4G = new Sprite(new Texture("GreyBR.png"));//TLsprite1G = new Sprite(new Texture("GreyTL.png"));//TL
         shapeRenderer = new ShapeRenderer();
+        shapeRendHud = new ShapeRenderer();
         circ = new Circle(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 150);
         sprite1.setSize(w / 2, h / 2);
         sprite2.setSize(w / 2, h / 2);
@@ -92,6 +95,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
         recTR = new Rectangle(w / 2, 0, w / 2, h / 2); // - the corners
         recBL = new Rectangle(0, h / 2, w / 2, h / 2);
         recBR = new Rectangle(w / 2, h / 2, w / 2, h / 2);
+        recHUD = new Rectangle(0, h - (h / 4.2f), w, (h / 4.2f) - 25);
         AlRandRect.add(recTL); //Populating the arraylist with rectangles
         AlRandRect.add(recTR);
         AlRandRect.add(recBL);
@@ -169,7 +173,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
             }
             isCont = true;
             if ((nRand - 30) >= nCountSwitch) {//colour location is about to change
-                font.setColor(Color.WHITE);
+                font.setColor(Color.BLACK);
             } else {
                 font.setColor(Color.RED);
             }
@@ -189,8 +193,10 @@ public class ScrSongOne extends InputAdapter implements Screen {
                 sprite4.setPosition(AlRandRect.get(3).x, AlRandRect.get(3).y); //S4 == 3
             }
             shapeRenderer.begin(ShapeType.Filled);
+            shapeRendHud.begin(ShapeType.Filled);
             batch.begin();
             if (isCol) {//draw coloured sprites
+                font.setColor(Color.WHITE);
                 sprite1.draw(batch);
                 sprite2.draw(batch);
                 sprite3.draw(batch);
@@ -200,6 +206,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
                 sprite2G.draw(batch);
                 sprite3G.draw(batch);
                 sprite4G.draw(batch);
+                shapeRendHud.rect(recHUD.getX(), 0, recHUD.getWidth(), recHUD.getHeight());
             }
             if (isExit) {//exit
                 Gdx.app.exit();
@@ -253,18 +260,6 @@ public class ScrSongOne extends InputAdapter implements Screen {
                     isClick = false;
                 }
             }
-            if (isCol) {//draw how long remains before points can be earned while coloured
-                font.draw(batch, String.valueOf(nCountCol) + " / " + String.valueOf("110"), fXMid + 30, fYMid * 2);
-            } else {//draw these fonts while grey
-                font.draw(batch, String.valueOf(nJ) + " / " + mainmenu.text, 170, fYMid * 2);//amount of pattern remaining
-                font.draw(batch, String.valueOf(fGood - 1), 220, fYMid * 2);//how many correct clicks
-                font.draw(batch, String.valueOf(fEff) + "%", 300, fYMid * 2);//percentage correct
-                font.draw(batch, String.valueOf(nTimeout) + " / " + String.valueOf(nMaxOut), 425, fYMid * 2);//time until middle colour changes
-                font.draw(batch, String.valueOf(nCountSwitch) + " / " + String.valueOf(nRand), 500, fYMid * 2);//time until colour locations change
-            }//draw these in both
-            font.draw(batch, "Escape to exit", fXMid - 50, 30);
-            font.draw(batch, "Spacebar to pause or unpause", fXMid - 50, 76);
-            font.draw(batch, "Press Enter to show end screen!", fXMid - 50, 52);
             //System.out.println("nCountSwitch: " + nCountSwitch + " nRand: " + nRand);
             batch.end();
             if (bCount && !isCol) {//if true: count up towards changing middle colour
@@ -288,6 +283,21 @@ public class ScrSongOne extends InputAdapter implements Screen {
             }
             shapeRenderer.circle(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 150);
             shapeRenderer.end();
+            shapeRendHud.end();
+            batchFonts.begin();
+            if (isCol) {//draw how long remains before points can be earned while coloured
+                font.draw(batchFonts, String.valueOf(nCountCol) + " / " + String.valueOf("110"), fXMid + 30, fYMid * 2);
+            } else {//draw these fonts while grey
+                font.draw(batchFonts, "Clicks remaining: " + String.valueOf(nJ) + " / " + mainmenu.text, 10, 80);//amount of pattern remaining
+                font.draw(batchFonts, "Clicks correct: " + String.valueOf(fGood - 1), 10, 60);//how many correct clicks
+                font.draw(batchFonts, "Percentage correct: " + String.valueOf(fEff) + "%", 10, 40);//percentage correct
+                font.draw(batchFonts, "Time to click remaining: " + String.valueOf(nTimeout) + " / " + String.valueOf(nMaxOut), 10, 20);//time until middle colour changes
+                //font.draw(batchFonts, "Time until colours change: " + String.valueOf(nCountSwitch) + " / " + String.valueOf(nRand), 10, 20);//time until colour locations change
+            }//draw these in both
+            font.draw(batchFonts, "Escape to exit", fXMid + 110, 32);
+            font.draw(batchFonts, "Spacebar to pause or unpause", fXMid + 110, 72);
+            font.draw(batchFonts, "Press Enter to show end screen!", fXMid + 110, 52);
+            batchFonts.end();
         } else if (!isDone && isPause) { //Paused (same comments)
             shapeRenderer.begin(ShapeType.Filled);
             batch.begin();
@@ -467,7 +477,7 @@ public class ScrSongOne extends InputAdapter implements Screen {
                     && AlRandRect.get(nNext) == recTR && !circ.contains(screenX, screenY)) {
                 isCorrect = true;
             }
-            if (!circ.contains(screenX, screenY) && !isPause && !isColNoClick) {//nothing happens if clicking middle circle
+            if (!circ.contains(screenX, screenY) && !isPause && !isColNoClick && !recHUD.contains(screenX, screenY)) {//nothing happens if clicking middle circle
                 isCirc = true;
             }
             if (isCirc) {//if anywhere other than middle circle clicked:
